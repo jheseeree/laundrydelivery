@@ -130,7 +130,7 @@ $conn->close();
     <div class="hero-bg-trans p-3 p-md-5 h-100">
         <div class="container-fluid h-100">
         <div class="h-100 d-flex flex-column align-items-end justify-content-center">
-            <div class="card sign-up-card px-5 py-5">
+            <div class="card sign-up-card px-5 py-5"> 
                 <?php
                     if($registerSuccess) { ?>
                         <div class="alert alert-success" role="alert">
