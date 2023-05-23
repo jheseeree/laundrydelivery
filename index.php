@@ -32,7 +32,7 @@
             <a class="nav-link" href="#">Contact</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" href="register.php">Log in</a>
+            <a class="nav-link" href="login.php">Log in</a>
         </li>
     </ul>
   </div>

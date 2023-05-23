@@ -2,7 +2,7 @@
   background-image: url(assets/backgroundpic.png);
   background-repeat: no-repeat;
   background-size: cover;
-  height: 94vh;
+  min-height: 94vh;
 
   background-position: center bottom;
 }
@@ -61,6 +61,7 @@
 
 .hero-bg-trans {
   background: #00000070;
+  min-height: 94vh;
 }
 
 .sign-up-card {
