@@ -72,7 +72,8 @@
   background: white !important;
   border: none !important;
   border-radius: 0rem 0.25rem 0.25rem 0.25rem !important;
-  min-height: 550px !important;
+  min-height: 350px !important;
+  max-height: 550px !important;
 }
 
 .btn-create {

@@ -14,15 +14,14 @@
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
-
+    
     if (isset($_POST['submit'])) {
         $username = $_POST['username'];
         $password = $_POST['password'];
-        
         if (empty($username) || empty($password)) {
             $required = true;
         } else {
-            $sql = "SELECT password AND role FROM user WHERE username = '$username'";
+            $sql = "SELECT * FROM user WHERE username = '$username'";
             $result = $conn->query($sql);
 
             if ($result->num_rows == 1) {
@@ -35,25 +34,72 @@
                     $_SESSION['loggedin'] = true;
                     $_SESSION['username'] = $username;
 
-                    if($row['role'] == 'rider') {
-                        header('Location: /awebdes_finals/dashboard-customer.php');
+                    $sql2 = "SELECT * FROM user WHERE username = '$username'";
+                    $result2 = $conn->query($sql);
+                    if ($result2->num_rows == 1) {
+                        if($row['role'] == 'customer') {
+                            header('Location: /awebdes_finals/dashboard-customer.php');
+                        }
+                        if($row['role'] == 'rider') {
+                            header('Location: /awebdes_finals/dashboard-rider.php');
+                        }
                     }
-                    
-                    else if($row['role'] == 'customer') {
-                        header('Location: /awebdes_finals/dashboard-customer.php');
-                    }
-                    
-                    else {
-                        return false; // Authentication failed
-                        $incorrect = true;
-                    }
-                $incorrect = true;
+
+                } else {
+
+                    $incorrect = true;
+
                 }
+
+            } else {
+
+                $incorrect = true;
+
             }
         }
+
+        $conn->close();
     }
 
-    $conn->close();
+    // if (isset($_POST['submit'])) {
+    //     $username = $_POST['username'];
+    //     $password = $_POST['password'];
+        
+    //     if (empty($username) || empty($password)) {
+    //         $required = true;
+    //     } else {
+    //         $sql = "SELECT password AND role FROM user WHERE username = '$username'";
+    //         $result = $conn->query($sql);
+
+    //         if ($result->num_rows == 1) {
+    //             $row = $result->fetch_assoc();
+    //             $hashedPassword = $row['password'];
+
+    //             if (password_verify($password, $hashedPassword)) {
+    //                 $required = false;
+    //                 $incorrect = false;
+    //                 $_SESSION['loggedin'] = true;
+    //                 $_SESSION['username'] = $username;
+
+    //                 if($row['role'] == 'rider') {
+    //                     header('Location: /awebdes_finals/dashboard-customer.php');
+    //                 }
+                    
+    //                 else if($row['role'] == 'customer') {
+    //                     header('Location: /awebdes_finals/dashboard-customer.php');
+    //                 }
+                    
+    //                 else {
+    //                     return false; // Authentication failed
+    //                     $incorrect = true;
+    //                 }
+    //             $incorrect = true;
+    //             }
+    //         }
+    //     }
+    // }
+
+    // $conn->close();
     
 ?>
 

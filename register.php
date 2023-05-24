@@ -20,6 +20,59 @@ if ($conn->connect_error) {
   die("Connection failed: " . $conn->connect_error);
 }
 
+// API TO SEND EMAIL - MAILJET - REST API
+function sendEmail() {
+    $apiKey = 'e7e3bcb4e0fbf5e3c407758f00276208';
+    $apiSecret = '1101a3c7cc89c3c919816ad33b4187e0';
+
+    $url = 'https://api.mailjet.com/v3.1/send';
+
+    $fname = $_POST['fname'];
+
+    $data = array(
+        'Messages' => array(
+            array(
+                'From' => array(
+                    'Email' => 'jmeres.student@asiancollege.edu.ph',
+                    'Name' => 'UWU Wash Delivery'
+                ),
+                'To' => array(
+                    array(
+                        'Email' => $_POST['email'],
+                        'Name' => $_POST['fname']
+                    )
+                ),
+                'Subject' => 'UWUWash Account Created Successfully!',
+                'TextPart' => "Dear $fname, Welcome to UWU Wash Delivery!",
+                'HTMLPart' => '
+                    <h3>Dear '.$fname.',</h3>
+                    <h3>Successfully created your account!</h3>
+                    <h3><a href="http://localhost/awebdes_finals/login.php">Click here</a> to login</h3>'
+            )
+        )
+    );
+
+    // CURL HTTP REQUEST TO API LINK
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $apiKey . ':' . $apiSecret);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+    $response = curl_exec($ch);
+
+    curl_close($ch);
+
+    if ($response === false) {
+        echo 'Failed to send email.';
+    } else {
+        echo 'Email sent successfully.';
+    }
+}
+
 if (isset($_POST['submit'])) {
     $username = $_POST['username'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -39,32 +92,29 @@ if (isset($_POST['submit'])) {
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $invalidEmail = true;
         } else {
-            // Check if the username already exists
             $checkUsernameQuery = "SELECT * FROM user WHERE username = '$username'";
             $checkUsernameResult = $conn->query($checkUsernameQuery);
 
             if ($checkUsernameResult->num_rows > 0) {
                 $existingUser = true;
             } else {
-                // Check if the email address already exists
                 $checkEmailQuery = "SELECT * FROM user WHERE email = '$email'";
                 $checkEmailResult = $conn->query($checkEmailQuery);
 
                 if ($checkEmailResult->num_rows > 0) {
                     $existingEmail = true;
                 } else {
-                    // Check if the contact number already exists
                     $checkContactQuery = "SELECT * FROM user WHERE contact = '$contact'";
                     $checkContactResult = $conn->query($checkContactQuery);
 
                     if ($checkContactResult->num_rows > 0) {
                         $existingContact = true;
                     } else {
-                        // Proceed with the registration
                         $insertQuery = "INSERT INTO user (role, username, password, contact, email, fname, lname, address) 
                                         VALUES ('customer', '$username', '$password', '$contact', '$email', '$fname', '$lname', '$address')";
 
                         if ($conn->query($insertQuery) === TRUE) {
+                            sendEmail();
                             $registerSuccess = true;
                             $_POST['username'] = null;
                             $_POST['password'] = null;

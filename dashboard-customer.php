@@ -28,27 +28,6 @@ if ($result->num_rows == 1) {
 
 $userInfo = $_SESSION['user_info'];
 
-
-if(isset($_POST['book'])) {
-    $customer_id = $userInfo->id;
-    $weight = 3.5;
-    $price = 120.00;
-    $delivery_time = "2023-05-23 10:00:00";
-    $status = "new";
-    $fulfillment_type = "Delivery";
-    $timestamp = date("Y-m-d H:i:s");
-
-    $sql = "INSERT INTO booking (customer_id, weight, price, delivery_time, status, fulfillment_type, timestamp) VALUES ('$customer_id', '$weight', '$price', '$delivery_time', '$status', '$fulfillment_type', '$timestamp')";
-
-    if ($conn->query($sql) === TRUE) {
-        echo "New record created successfully";
-    } else {
-        echo "Error: " . $sql . "<br>" . $conn->error;
-    }
-
-    $conn->close();
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -116,26 +95,39 @@ if(isset($_POST['book'])) {
                             </div>
                         </div>
                         <div class="col-12">
-                            <div class="dash-card w-100 p-4">
-                                <div class="card shadow-sm p-3 mb-3">
-                                    <div class="d-flex justify-content-between">
-                                        <div>
-                                            <h5><span class="badge badge-primary">New</span></h5>
-                                            <h5 class="card-title mb-1">
-                                                Booking No: <strong>23498712223</strong>
-                                            </h5>
-                                            <p class="mb-0 text-secondary">
-                                                May 23, 2023
-                                            </p>
+                            <div class="dash-card w-100 p-4 overflow-auto">
+                                <?php 
+                                    $sql = "SELECT * FROM booking WHERE customer_id=$userInfo->id";
+                                    $result = $conn->query($sql);
+
+                                    if ($result->num_rows > 0) {
+                                        while($row = $result->fetch_assoc()) {
+                                    ?>
+                                        <div class="card shadow-sm p-3 mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h5><span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span></h5>
+                                                    <h5 class="card-title mb-1">
+                                                        Booking No: <strong><?php echo $row['id']; ?></strong>
+                                                    </h5>
+                                                    <p class="mb-0 text-secondary">
+                                                        <?php echo $row['created_on']; ?>
+                                                    </p>
+                                                </div>
+                                                <div class="align-self-center text-right">
+                                                    <h5 class="text-secondary"><?php echo $row['weight']; ?> kg</h5>
+                                                    <h5 class="text-success font-weight-bold mb-0">
+                                                        Php <?php echo $row['price']; ?>
+                                                    </h5>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="align-self-center text-right">
-                                            <span class="text-secondary">Wash, Iron, Fold</span>
-                                            <h5 class="text-success font-weight-bold mb-0">
-                                                Php 120.00
-                                            </h5>
-                                        </div>
-                                    </div>
-                                </div>
+                                    <?php
+                                        }
+                                    } else {
+                                        echo "0 results";
+                                    }
+                                ?>
                             </div>
                         </div>
                     </div>
@@ -193,102 +185,207 @@ if(isset($_POST['book'])) {
         <div class="modal-header">
           <h5 class="modal-title">Create a Booking</h5>
         </div>
-        <form method="POST" class="mb-0" id="bookingForm">
+        <form method="POST" class="mb-0">
             <div class="modal-body p-4">
-                <div class="form-group d-flex justify-content-between align-items-center">
-                    <span>Wash</span>
-                    <span>Php 50</span>
-                </div>
-                <div class="form-group d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="iron" id="iron" value="iron">
-                            <label class="form-check-label" for="iron">Iron</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="checkbox" name="fold" id="fold" value="fold">
-                            <label class="form-check-label" for="fold">Fold</label>
-                        </div>
-                    </div>
-                    <span>Php 0</span>
-                </div>
-                <div class="form-group d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment1" value="delivery" checked>
-                            <label class="form-check-label" for="fulfillment1">For Delivery</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment2" value="pickup">
-                            <label class="form-check-label" for="fulfillment2">For Pick-up</label>
-                        </div>
-                    </div>
-                    <span>Php 0</span>
-                </div>
-                <hr>
-                <div class="form-group d-flex justify-content-between align-items-center">
-                    <span class="font-weight-bold">TOTAL</span>
-                    <span class="text-success font-weight-bold">Php 50</span>
-                </div>
-                <hr>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Enter Weight (kg)</label>
                     <div class="d-flex justify-content-center align-items-center">
                         <button class="btn btn-primary" type="button" onclick="removeWeight()">-</button>
-                        <input class="weight-input mx-3" type="number" min="1" name="" id="laundry_weight">
+                        <input class="weight-input mx-3" type="number" min="1" name="laundry_weight" id="laundry_weight">
                         <button class="btn btn-primary" type="button" onclick="addWeight()">+</button>
                     </div>
                 </div>
                 <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="iron" id="iron" value="iron">
+                        <label class="form-check-label" for="iron">Iron</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" name="fold" id="fold" value="fold">
+                        <label class="form-check-label" for="fold">Fold</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment1" value="delivery" checked>
+                        <label class="form-check-label" for="fulfillment1">For Delivery</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="fulfillment" id="fulfillment2" value="pickup">
+                        <label class="form-check-label" for="fulfillment2">For Pick-up</label>
+                    </div>
+                </div>
+                <hr>
+                <div class="form-group d-flex justify-content-between align-items-center">
+                    <span class="font-weight-bold">TOTAL</span>
+                    <span id="totalPrice" class="text-success font-weight-bold"></span>
+                </div>
+                <hr>
+                <div class="form-group" id="other_address_form">
                     <label for="exampleFormControlSelect1">Deliver to another address</label>
-                    <input type="text" class="form-control" name="" id="">
+                    <input type="text" class="form-control" name="other_address" id="other_address" placeholder="Enter new address">
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Notes (Optional)</label>
-                    <input type="text" class="form-control" name="" id="" placeholder="Special requests, comments, etc">
+                    <input type="text" class="form-control" name="notes" id="notes" placeholder="Special requests, comments, etc">
                 </div>
                 <div class="mt-4">
                     <small><strong>Policy:</strong> Lorem ipsum dolor sit amet consectetur adipisicing elit. Dolorum tempora exercitationem, nemo nobis eaque accusantium.</small>
                 </div>
             </div>
             <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" id="close_booking_modal">Close</button>
-            <button type="submit" name="book" class="btn btn-primary">Confirm Booking</button>
+                <button type="button" class="btn btn-secondary" id="close_booking_modal">Close</button>
+                <button type="submit" name="submit" class="btn btn-primary">Confirm Booking</button>
             </div>
         </form>
       </div>
     </div>
 </div>
 
+<?php
+
+if(isset($_POST['submit'])) {
+
+    $baseWashAmount = 70;
+    $baseIronPrice = 40;
+    $baseFoldPrice = 40;
+    $baseDeliveryPrice = 40;
+
+    $iron = false;
+    $fold = false;
+
+    if(isset($_POST['iron'])) {
+        $iron = true;
+    }
+
+    if(isset($_POST['fold'])) {
+        $iron = true;
+    }
+
+    $fulfillment = $_POST['fulfillment'];
+    $laundryWeight = $_POST['laundry_weight'];
+
+    $weightMultiplier = ceil($laundryWeight / 7);
+    $washAmount = $baseWashAmount * $weightMultiplier;
+    $ironPrice = $baseIronPrice * $weightMultiplier;
+    $foldPrice = $baseFoldPrice * $weightMultiplier;
+    $deliveryPrice = $baseDeliveryPrice * $weightMultiplier;
+
+    $additionalPrice = 0;
+
+    if ($iron) {
+        $additionalPrice += $ironPrice;
+    }
+
+    if ($fold) {
+        $additionalPrice += $foldPrice;
+    }
+
+    $fulfillmentPrice = 0;
+
+    if ($fulfillment === 'delivery') {
+        $fulfillmentPrice = $deliveryPrice;
+    }
+
+    $totalAmount = $washAmount + $additionalPrice + $fulfillmentPrice;
+
+
+    $customer_id = $userInfo->id;
+    $weight = $_POST['laundry_weight'];
+    $price = $totalAmount;
+    $status = "new";
+    $otherAddress = $_POST['other_address'];
+    $notes = $_POST['notes'];
+    $fulfillment_type = $_POST['fulfillment'];
+
+    $sql = "INSERT INTO booking (customer_id, weight, price, status, other_address, notes, fulfillment_type) VALUES ('$customer_id', '$weight', '$price', '$status', '$otherAddress', '$notes', '$fulfillment_type')";
+
+    if ($conn->query($sql) === TRUE) {
+        header('Location: /awebdes_finals/dashboard-customer.php');
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+
+    $conn->close();
+}
+
+?>
+
+
 <script>
 
-let washAmount = 70;
-let iron = false;
-let fold = false;
-let fulfillment = 'delivery';
-let laundryWeight = 1;
-let otherAddress = '';
-let notes = '';
+    let baseWashAmount = 70;
+    let baseIronPrice = 40;
+    let baseFoldPrice = 40;
+    let baseDeliveryPrice = 40;
 
-const weightField = document.getElementById("laundry_weight");
-weightField.value = laundryWeight;
+    let iron = false;
+    let fold = false;
+    let fulfillment = 'delivery';
+    let laundryWeight = 1;
+    let otherAddress = '';
+    let notes = '';
 
-function addWeight() {
-    laundryWeight = laundryWeight + 1;
+    const weightField = document.getElementById("laundry_weight");
+    const totalPriceElement = document.getElementById("totalPrice");
+
     weightField.value = laundryWeight;
-}
 
-function removeWeight() {
-    if(laundryWeight > 1) {
-        laundryWeight = laundryWeight - 1;
-        weightField.value = laundryWeight;
+    calculatePrices();
+
+    function calculatePrices() {
+        let weightMultiplier = Math.ceil(laundryWeight / 7);
+        let washAmount = baseWashAmount * weightMultiplier;
+        let ironPrice = baseIronPrice * weightMultiplier;
+        let foldPrice = baseFoldPrice * weightMultiplier;
+        let deliveryPrice = baseDeliveryPrice * weightMultiplier;
+
+        let additionalPrice = 0;
+
+        if (iron) {
+            additionalPrice += ironPrice;
+        }
+
+        if (fold) {
+            additionalPrice += foldPrice;
+        }
+
+        let fulfillmentPrice = 0;
+
+        if (fulfillment === 'delivery') {
+            fulfillmentPrice = deliveryPrice;
+        }
+
+        let totalAmount = washAmount + additionalPrice + fulfillmentPrice;
+
+        totalPriceElement.innerText = "Php " + totalAmount.toString();
     }
-}
 
+    function addWeight() {
+        laundryWeight += 1;
+        weightField.value = laundryWeight;
+        calculatePrices();
+    }
 
+    function removeWeight() {
+        if (laundryWeight > 1) {
+            laundryWeight -= 1;
+            weightField.value = laundryWeight;
+            calculatePrices();
+        }
+    }
 
-$(document).ready(function() {
-    
+    document.getElementById("fulfillment1").addEventListener("change", function () {
+        fulfillment = 'delivery';
+        document.getElementById("other_address_form").classList.remove("d-none");
+        calculatePrices();
+    });
+
+    document.getElementById("fulfillment2").addEventListener("change", function () {
+        fulfillment = 'pickup';
+        document.getElementById("other_address_form").classList.add("d-none");
+        calculatePrices();
+    });
 
     function navigateTo(page) {
         switch(page) {
@@ -332,32 +429,6 @@ $(document).ready(function() {
     });
 
 
-    $('#bookingForm').submit(function(e) {
-        e.preventDefault(); // Prevent the form from submitting normally
-
-        // Get the form data
-        var formData = $(this).serialize();
-
-        console.log(formData);
-
-        // Make the AJAX request
-        // $.ajax({
-        //     type: 'POST',
-        //     url: 'process_booking.php', // Replace with the URL of your PHP script to handle the booking
-        //     data: formData,
-        //     success: function(response) {
-        //         // Handle the response from the server
-        //         console.log(response); // You can do something with the response here
-        //         alert('Booking successful!'); // Display a success message or perform other actions
-        //     },
-        //     error: function(xhr, status, error) {
-        //         // Handle errors
-        //         console.error(error); // Log the error for debugging
-        //         alert('An error occurred. Please try again.'); // Display an error message to the user
-        //     }
-        // });
-    });
-});
 </script>
     
 </body>

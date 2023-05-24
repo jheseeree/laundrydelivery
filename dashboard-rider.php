@@ -113,33 +113,46 @@ if(isset($_POST['book'])) {
                                 </div>
                             </div>
                             <div class="col-12" id="active_list">
-                                <div class="dash-card w-100 p-4">
-                                    <div class="card shadow-sm p-3 mb-3">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <h5>
-                                                    <span class="badge badge-primary">Ready</span>
-                                                </h5>
-                                                <h5 class="card-title mb-1">
-                                                    Booking No: <strong>23498712223</strong>
-                                                </h5>
-                                                <p class="mb-0 text-secondary">
-                                                    May 23, 2023
-                                                </p>
-                                                <p class="mb-0 text-secondary">
-                                                    Customer: Sample 1
-                                                </p>
-                                                <p class="mb-0 text-secondary">
-                                                    Address: Sample Address Here
-                                                </p>
-                                            </div>
-                                            <div class="align-self-end text-right">
-                                                <button class="btn btn-create text-light px-3 mt-4 mb-1" id="create_booking">
-                                                    Booking Details
-                                                </button>
+                                <div class="dash-card w-100 p-4 overflow-auto">
+                                <?php 
+                                    $sql = "SELECT * FROM booking INNER JOIN user ON booking.customer_id = user.id";
+                                    $result = $conn->query($sql);
+
+                                    if ($result->num_rows > 0) {
+                                        while($row = $result->fetch_assoc()) {
+                                    ?>
+                                        <div class="card shadow-sm p-3 mb-3">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <h5>
+                                                        <span class="badge badge-primary text-capitalize"><?php echo $row['status']; ?></span>
+                                                    </h5>
+                                                    <h5 class="card-title mb-1">
+                                                        Booking No: <strong><?php echo $row['id']; ?></strong>
+                                                    </h5>
+                                                    <p class="mb-0 text-secondary">
+                                                        <?php echo $row['created_on']; ?>
+                                                    </p>
+                                                    <p class="mb-0 text-secondary">
+                                                        Customer: <?php echo $row['fname']; ?> <?php echo $row['lname']; ?>
+                                                    </p>
+                                                    <p class="mb-0 text-secondary">
+                                                        Address: <?php echo $row['address']; ?>
+                                                    </p>
+                                                </div>
+                                                <div class="align-self-end text-right">
+                                                    <button class="btn btn-create text-light px-3 mt-4 mb-1" id="create_booking">
+                                                        Booking Details
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    <?php
+                                        }
+                                    } else {
+                                        echo "0 results";
+                                    }
+                                ?>
                                 </div>
                             </div>
                             <div class="col-12 d-none" id="delivery_list">
@@ -286,7 +299,7 @@ if(isset($_POST['book'])) {
     </div>
 </div> -->
 
-<div class="modal-wrapper" id="booking_modal">
+<div class="modal-wrapper d-none" id="booking_modal">
     <div class="booking-modal modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
