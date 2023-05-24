@@ -43,6 +43,9 @@
                         if($row['role'] == 'rider') {
                             header('Location: /awebdes_finals/dashboard-rider.php');
                         }
+                        if($row['role'] == 'admin') {
+                            header('Location: /awebdes_finals/dashboard-admin.php');
+                        }
                     }
 
                 } else {
